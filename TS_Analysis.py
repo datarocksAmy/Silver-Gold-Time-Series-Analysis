@@ -9,7 +9,6 @@ import numpy as np
 def CleanData(DF):
     '''
         Modify Date Value to convert to datetime accepted object + Convert text data into numerical values
-
     :param DF: Raw data in dataframe
     :return: Numerical dataframe besides Dates
     '''
@@ -42,11 +41,13 @@ def CleanData(DF):
 
 def ObservationsByTimeWindow(commodity, DataDF):
     """
-
+        Observe Price on Rolling-Mean and Resampling
     :param commodity: Silver or Gold
     :param DataDF: Clean Dataframe from chosen commodity
     :return: Plot resampled rolling mean by different time window for chosen commodity on Price and Volume
     """
+    # Get column names
+    data_columns = list(DataDF.columns)
     # Resample Original Data with different time window - daily/weekly/monthly
     daily_mean = DataDF[data_columns].resample('B').mean()
     weekly_mean = DataDF[data_columns].resample('W').mean()
@@ -92,18 +93,17 @@ def ObservationsByTimeWindow(commodity, DataDF):
 
 def ObservationACF_PACF(commodity, DataDF):
     """
-    Plot ACF and PACF graphs for Silver or Gold Price
-
+        Plot ACF and PACF graphs for Silver or Gold Price
     :param commodity: Silver or Gold
     :param DataDF: Clean Dataframe from chosen commodity
     :return: Generate ACF and PACF figures for chosen commodity
     """
     # ACF + PACF Evaluation
     priceData = DataDF['Price'].reset_index(drop=True)
-    # Split Dat into Train and Test
-    percentage_training = 0.8
+    # Lag number
     numLags = 15
-
+    # Split Dat into Train and Test
+    percentage_training = 0.7
     split_point = round(len(priceData) * percentage_training)
     train, test = priceData[0:split_point], priceData[split_point:]
     # plt.plot(train)
@@ -145,31 +145,18 @@ def ObservationACF_PACF(commodity, DataDF):
 
 
 # --------------------------------------------- MAIN ---------------------------------------------
-# Run the Observation for both Commodity
-commodity = ["Silver", "Gold"]
-
-for idx in range(len(commodity)):
-    # Read data from csv to dataframe
-    Data = pd.read_csv("Data\\" + commodity[idx] + " Futures Historical Data.csv")
-    # Clean up data - convert text data into numbers
-    DataDF = CleanData(Data)
+def TS_Main(commodity, DataDF):
+    """
+    Time Series
+    :param commodity:
+    :param DataDF:
+    :return:
+    """
     # Set Date as index
     DataDF.set_index(pd.DatetimeIndex(DataDF['Date']), inplace=True)
     DataDF = DataDF.drop(['Date', 'Change %'], axis=1)
-    data_columns = list(DataDF.columns)
 
     # Observations by different time window
-    ObservationsByTimeWindow(commodity[idx], DataDF)
-
+    ObservationsByTimeWindow(commodity, DataDF)
     # Generate ACF + PACF for each commodity
-    ObservationACF_PACF(commodity[idx], DataDF)
-
-
-
-'''
-# SARIMA Model Built
-SARIMA_model = SARIMAX(train, order=(0, 1, 1), enforce_stationarity=False, enforce_invertibility=False, trend='c')
-# Extract Fitted Model
-SARIMA_model_fit = SARIMA_model.fit(disp=False)
-print(SARIMA_model_fit.summary())
-'''
+    ObservationACF_PACF(commodity, DataDF)
