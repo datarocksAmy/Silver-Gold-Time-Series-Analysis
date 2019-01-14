@@ -1,15 +1,12 @@
 # Library used
 from fbprophet import Prophet
 from fbprophet.diagnostics import cross_validation, performance_metrics
-import pandas as pd
 from sklearn.metrics import mean_squared_error, r2_score
 from math import sqrt, log
 import matplotlib.pylab as plt
 import warnings
-from datetime import datetime
 import matplotlib as mpl
 import pickle
-
 
 
 def ProphetModel(commodity, cleanDF):
@@ -96,6 +93,6 @@ def ProphetModel(commodity, cleanDF):
 
     # Pickle the Trained/Tested Prophet Model for further use
     prophetModelPickleName = "{}_Forecaster.pickle".format(commodity)
-    #with open(prophetModelPickleName, "wb") as AF:
-        #pickle.dump(m, AF)
+    with open(prophetModelPickleName, "wb") as AF:
+        pickle.dump(model, AF)
 
